@@ -1,0 +1,39 @@
+﻿<Properties>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\Environment\BloodCell.cs">
+    <Files>
+      <File FileName="Assets\Scripts\Management\GameManager.cs" Line="56" Column="21" />
+      <File FileName="Assets\Scripts\Environment\BloodCell.cs" Line="19" Column="33" />
+      <File FileName="Assets\Scripts\Environment\VectorPaths.cs" Line="42" Column="19" />
+      <File FileName="Assets\Scripts\Management\Singleton.cs" Line="75" Column="2" />
+    </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State expanded="True">
+          <Node name="Assembly-CSharp" expanded="True">
+            <Node name="Assets" expanded="True">
+              <Node name="Scripts" expanded="True">
+                <Node name="Environment" expanded="True">
+                  <Node name="BloodCell.cs" selected="True" />
+                </Node>
+                <Node name="Management" expanded="True" />
+              </Node>
+            </Node>
+          </Node>
+          <Node name="Assembly-CSharp-firstpass" expanded="True">
+            <Node name="Assets" expanded="True">
+              <Node name="Plugins" expanded="True" />
+            </Node>
+          </Node>
+        </State>
+      </Pad>
+      <Pad Id="ClassPad">
+        <State expanded="True" selected="True" />
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>
