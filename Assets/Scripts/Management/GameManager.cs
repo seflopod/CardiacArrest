@@ -19,6 +19,7 @@ public class GameManager : Singleton<GameManager>
     public PlayerHeartStats heartStats = new PlayerHeartStats();
     public PlatformTiles platformTileInfo = new PlatformTiles();
 	public BloodCellData bloodCellData = new BloodCellData();
+    public GameConditions conditions = new GameConditions();
 	public GameObject playerPrefab;
 	public GameObject enemyPrefab;
 	#endregion
@@ -29,6 +30,8 @@ public class GameManager : Singleton<GameManager>
 	private static GameState _state;
 	private Player _player;
     private bool _loadNext;
+    private static SimpleTimer _gameTimer;
+    private static float _distanceRun;
 	#endregion
 	
 	#region unity_functions
@@ -50,23 +53,20 @@ public class GameManager : Singleton<GameManager>
 	private void InitMainGame()
 	{
 		InitCells();
+		//may not need to assign the instantiation to a variable
 		_player = ((GameObject)GameObject.Instantiate(playerPrefab, (new Vector3(29.0f, 1.1f, 0.0f)), Quaternion.Euler(0.0f, 180.0f, 0.0f))).GetComponent<Player>();
 		GameObject.Instantiate(enemyPrefab, (new Vector3(21.0f, 1.1f, 4.4f)),
 								Quaternion.Euler(0.0f, 180.0f, 0.0f));
 		_speed = movement.minSpeed;
 		_heartRate = heartStats.minHeartRate;
+        _gameTimer = new SimpleTimer(conditions.maxTime);
 	}
 	
 	private void InitCells()
 	{
-		GenerateBloodCellPaths();
+		BloodCell.BloodCellHorizSpeed = -bloodCellData.movementSpeed;
+		BloodCell.BloodCellVertSpeed = bloodCellData.movementSpeed;
 		BloodCell.GenerateCells(bloodCellData);
-	}
-	
-	private void GenerateBloodCellPaths()
-	{
-		VectorPaths.GenerateLinearPath(Vector3.zero, Vector3.right*bloodCellData.numberOfCells*bloodCellData.cellXScale, true);
-		VectorPaths.GenerateSinePath(bloodCellData.numberOfCells, bloodCellData.numberOfCells, 2.0f, 5.0f, 0.0f, 5.0f, true);
 	}
 	#endregion
 	
@@ -85,7 +85,17 @@ public class GameManager : Singleton<GameManager>
     }
     #endregion
 	
-	#region properties	
+	#region properties
+    public static float TimeRemaining
+    {
+        get { return _gameTimer.TimeRemaining; }
+    }
+    
+    public static float DistanceRun
+    {
+        get { return _distanceRun; }
+    }
+    
 	public static float Speed
 	{
 		get { return _speed; } 

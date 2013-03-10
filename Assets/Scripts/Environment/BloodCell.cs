@@ -9,7 +9,6 @@ public class BloodCell : MonoBehaviour
 		GameObject newCellObj;
 		GameObject sceneParent;
 		BloodCell newCell;
-		Vector3[] usingPath;
 		int ubound;
 		
 		//Create a Random object, this is just to cut down on line length.
@@ -23,8 +22,10 @@ public class BloodCell : MonoBehaviour
 		
 		for(int i=0;i<bcData.cellPrefabs.Length;++i)
 		{
-			ubound = bcData.numberOfCells/(i+1);
-			usingPath = VectorPaths.PathAtIndex(i);
+			if(i==0)
+				ubound = bcData.numberOfCells;
+			else
+				ubound = bcData.numberOfCells/(2*i); //4 is so fucking arbitrary.
 			
 			for(int j=0;j<ubound;++j)
 			{
@@ -42,82 +43,135 @@ public class BloodCell : MonoBehaviour
 				newCellObj.name = baseName + i.ToString() + j.ToString().PadLeft(4,'0');
 				newCellObj.transform.parent = sceneParent.transform;
 				
-				//Position the cell on a path and give it a speed.
+				//Position the cell on a give it speeds.
 				newCell = newCellObj.AddComponent<BloodCell>();
-				newCell.CellPath = usingPath;
-				newCell.PercentOnPath = j/((float)ubound);
-				newCell.Speed = 0.0f;
+				newCell.Init(Vector3.right*j*(bcData.numberOfCells/ubound),
+								0.0f,
+								bcData.numberOfCells*bcData.cellXScale,
+								0.0f, i*5.0f); //arbitrary and subject to change
+				newCell.HorizontalSpeed = 0.0f;
+				newCell.VerticalSpeed = 0.0f;
 			}
 		}
 	}
 	
-	public static float BloodCellSpeed { get; set; }
+	//these are for general movement, but with the instance vars there can be variance
+	//if so desired.
+	public static float BloodCellHorizSpeed { get; set; }
+	public static float BloodCellVertSpeed { get; set; }
 	#endregion
 	
-	#region private_vars
-	private float _pctOnPath;
-	private Vector3[] _path;
-	private bool _looped;
+	#region private_vars	
+	private float _minX;
+	private float _maxX;
+	private float _minY;
+	private float _maxY;
+	private float _avgY;
+	private bool _moveVertical;
+	private bool _lowTarget;
+	private bool _highTarget;
+	private float _yTarget;
+	private float _hSpeed;
+	private float _vSpeed;
+	private float _deltaTime;
+	private Vector3 _newPos;
 	#endregion
 	
 	#region unity_funcs
-	
-	private void Awake()
-	{
-		_pctOnPath = 0.0f;
-		_looped = false;
-	}
-	
 	private void Update()
 	{
-		if(_path != null)
+		_hSpeed = BloodCellHorizSpeed;
+		_vSpeed = BloodCellVertSpeed;
+		
+		_deltaTime = Time.deltaTime;
+		
+		//move the cell and adjust if it reaches its bounds
+		_newPos = transform.position;
+		_newPos.x+=_hSpeed * _deltaTime;
+		if(_hSpeed < 0)
 		{
-			//not the best way, I just didn't want to change a few lines if this
-			//doesn't work as expected
-			this.Speed = BloodCell.BloodCellSpeed;
-			
-			_pctOnPath += this.Speed*Time.deltaTime;
-			if(gameObject.name.Contains("0000"))
-				print (this.Speed + " " + _pctOnPath);
-			if(_pctOnPath > 1.0f && !_looped)
-			{
-				_looped = true;
-				_pctOnPath-=1.0f;
-				if(gameObject.name.Contains("0000"))
-					print ("New Pct:" + _pctOnPath);
-				iTween.MoveUpdate(gameObject,
-									iTween.PointOnPath(_path,_pctOnPath), 0.0f);
-			}
-			else
-			{
-				_looped = false;
-				iTween.MoveUpdate(gameObject,
-									iTween.PointOnPath(_path,_pctOnPath),
-									this.Speed);
-			}
-			//iTween.PutOnPath(transform, _path, _pctOnPath);
+			if(_newPos.x <= _minX)
+				_newPos.x = _maxX - _minX + _newPos.x;
 		}
+		else if(_hSpeed > 0)
+		{
+			//I haven't checked to see if this works, so the signs might be off
+			if(_newPos.x >= _maxX)
+				_newPos.x = _minX - _maxX + _newPos.x;
+		}
+		
+		if(_moveVertical)
+		{
+			_newPos.y += ((_yTarget<_avgY)?-1:1) * _vSpeed * _deltaTime;
+			if((_yTarget < _avgY && _newPos.y <= _yTarget) || 
+				(_yTarget > _avgY && _newPos.y >= _yTarget))
+				SetNewYTarget();
+		}
+		transform.position = _newPos;
 	}
 	#endregion
 	
-	#region properties
-	public float PercentOnPath
+	public void Init(Vector3 startPos, float minX, float maxX, float minY,
+						float maxY)
 	{
-		get { return _pctOnPath; }
-		set
+		_minX = minX;
+		_maxX = maxX;
+		_minY = minY;
+		_maxY = maxY;
+		_avgY = (maxY + minY) / 2;
+		_moveVertical = (minY != maxY);
+		_highTarget = false;
+		_lowTarget = false;
+		_yTarget = _avgY;
+		if(_moveVertical)
 		{
-			_pctOnPath = value;
-			iTween.PutOnPath(transform, _path, value);
-			
+			SetNewYTarget();
+			startPos.y = _avgY;
+		}
+		transform.position = startPos;
+	}
+	
+	private void SetNewYTarget()
+	{
+		do
+		{
+			if(_lowTarget)
+			{
+				_yTarget = Random.Range(_avgY, _maxY);
+			}
+			else if(_highTarget)
+			{
+				_yTarget = Random.Range(_minY, _avgY);
+			}
+			else
+			{
+				_yTarget = Random.Range(_minY, _maxY);
+			}
+		} while(_yTarget == _avgY);
+		
+		if(_yTarget < _avgY)
+		{
+			_lowTarget = true;
+			_highTarget = false;
+		}
+		else
+		{
+			_lowTarget = false;
+			_highTarget = true;
 		}
 	}
 	
-	public Vector3[] CellPath
+	#region properties
+	public float VerticalSpeed
 	{
-		get { return _path; }
-		set { _path = value; }
+		get { return _vSpeed; }
+		set { _vSpeed = value; }
 	}
 	
-	public float Speed { get; set; }
+	public float HorizontalSpeed
+	{
+		get { return _hSpeed; }
+		set { _hSpeed = value; }
+	}
 	#endregion
 }

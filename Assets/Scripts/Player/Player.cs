@@ -6,6 +6,7 @@ public enum PlayerState
 {
 	Running,
 	Jumping,
+	Falling,
 	Dead
 };
 
@@ -16,15 +17,12 @@ public class Player : Singleton<Player>
     
     private static PlayerState _state;
     
-    private Vector3 _startPos;
-    private SkinnedMeshRenderer _meshRenderer;
     private float _timer;
     
+	#region unity_funcs
     protected override void Awake()
     {
         base.Awake();
-        _startPos = transform.position;
-        _meshRenderer = gameObject.GetComponentInChildren<SkinnedMeshRenderer>();
         animation.wrapMode = WrapMode.Loop;
         animation["beat"].blendMode = AnimationBlendMode.Additive;
         animation["jump"].speed = 2;
@@ -49,14 +47,26 @@ public class Player : Singleton<Player>
             case PlayerState.Jumping:
                 animation.CrossFade("jump");
 				animation["beat"].speed = GameManager.Speed/2.0f; //shouldn't this be tuned to HeartRate?
+				if(rigidbody.velocity.y <= -1.0f)
+					_state = PlayerState.Falling;
                 break;
+			case PlayerState.Falling:
+				break;
             case PlayerState.Dead:
                 break;
             default:
                 break;
         }
     }
-    
+	
+	private void OnCollisionEnter(Collision collision)
+	{
+		if(_state == PlayerState.Falling && collision.transform.position.y <= transform.position.y)
+		{
+			_state = PlayerState.Running;
+		}
+	}
+    #endregion
     private void Running()
     {
         animation["run"].speed = GameManager.Speed/1.6f;

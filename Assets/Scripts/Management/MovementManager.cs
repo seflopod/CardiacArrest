@@ -48,7 +48,7 @@ public class MovementManager : Singleton<MovementManager>
 		
         if(doJump)
         {
-            if(Player.State != PlayerState.Jumping)
+            if(!(Player.State == PlayerState.Jumping || Player.State == PlayerState.Falling))
             {
                 Player.State = PlayerState.Jumping;
                 Player.Instance.transform.gameObject.rigidbody.AddForce(0.0f,
@@ -57,11 +57,6 @@ public class MovementManager : Singleton<MovementManager>
                                                             ForceMode.Impulse);
                 //GameManager.HeartRate*=1.2f; //arbitrary and subject to change
             }
-			
-			//If we're at or near a platform, we're not jumping; we're running.
-            if(Physics.Raycast(Player.Instance.transform.position,-Vector3.up,
-								0.1f))
-                Player.State = PlayerState.Running;
         }
 		if(doSprint)
 		{
@@ -97,6 +92,8 @@ public class MovementManager : Singleton<MovementManager>
 		if(GameManager.Speed >= movement.speedDampen)
 			GameManager.Speed-=movement.speedDampen;
 		
-		BloodCell.BloodCellSpeed = GameManager.Speed / 10;
+		//b/c of where camera is, by default BloodCells move to -inf on x.
+		BloodCell.BloodCellHorizSpeed = -1*GameManager.Speed;
+		BloodCell.BloodCellVertSpeed = GameManager.Speed;
 	}
 }

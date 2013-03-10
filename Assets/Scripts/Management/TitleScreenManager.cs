@@ -14,7 +14,7 @@ public class TitleScreenManager : Singleton<TitleScreenManager>
 	private JumperStates _jumperState;
 	private bool _jumped;
 		
-	private void Awake()
+	protected override void Awake()
 	{
 		base.Awake();
 	}
