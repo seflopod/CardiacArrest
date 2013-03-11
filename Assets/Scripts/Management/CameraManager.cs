@@ -61,15 +61,15 @@ public class CameraManager : Singleton<CameraManager>
 			_targetFOV = _dFOV * (GameManager.Speed -
                                     GameManager.Instance.movement.maxSpeed) +
                                                                         minFOV;
-            if(_targetFOV < camera.fieldofView)
+            if(_targetFOV < camera.fieldOfView)
 			    camera.fieldOfView = Mathf.Lerp(camera.fieldOfView, _targetFOV,
                                                 Time.time);
 			
 			//Make sure the player is correctly positioned in the viewport
 			_targetY = DetermineTargetY();
 			if(_targetY != _newPos.y)
-				_newPos.y = Mathf.SmoothDamp(_curPos.y, _newPos.y, _vVelocity,
-                                            _vLag);
+				_newPos.y = Mathf.SmoothDamp(_curPos.y, _newPos.y,
+											ref _vVelocity, _vLag);
 			
 			transform.position = _newPos;
 		}
@@ -78,38 +78,41 @@ public class CameraManager : Singleton<CameraManager>
 	private float DetermineTargetY()
 	{
 		Vector3 playerPos = Player.Instance.transform.position;
-        float ret;
+		Ray rayToPlayerY = camera.ViewportPointToRay((new Vector3(0.5f, playerPos.y, playerPos.z)));
+		Ray rayToHeight;
+		Plane planeAtPlayer = new Plane(Vector3.forward*-1, playerPos);
+        float ret = _newPos.y;
         
 		switch(Player.State)
 		{
 		case PlayerState.Running:
-            ret = camera.ViewportPointToWorld((new Vector3(0.5f, _runPct, playerPos.z))).y;
+            ret = camera.ViewportToWorldPoint((new Vector3(0.5f, _runPct, playerPos.z))).y;
 			break;
 		case PlayerState.Jumping:
-            Ray rayToPlayerY = camera.ViewportPointToRay((new Vector3(0.5f, playerPos.y, playerPos.z)));
-			Ray rayToMaxHeight = camera.ViewportPointToRay((new Vector3(0.5f, _jmpPct, playerPos.z)));
-            float angleToMaxRay = Vector3.Angle(rayToPlayerY.direction, rayToMaxHeight.direction);
-            
+			rayToHeight = camera.ViewportPointToRay((new Vector3(0.5f, _jmpPct, playerPos.z)));
+            float angleToMaxRay = Vector3.Angle(rayToPlayerY.direction, rayToHeight.direction);
+            print (angleToMaxRay);
+			Debug.DrawRay(rayToPlayerY.origin, rayToPlayerY.direction);
+			Debug.DrawRay(rayToHeight.origin, rayToHeight.direction);
             //check to see if the angle is near some threshold, which can be
             //made into a variable at some point in the future.
-            if(angleToMaxRay <= 1.0f)
+            if(angleToMaxRay >= 10.0f && rayToHeight.GetPoint(1.0f).y < rayToPlayerY.GetPoint(1.0f).y)
                 ret = playerPos.y;
 			break;
 		case PlayerState.Falling:
-			Ray rayToPlayerY = camera.ViewportPointToRay((new Vector3(0.5f, playerPos.y, playerPos.z)));
-    		Ray rayToMinHeight = camera.ViewportPointToRay((new Vector3(0.5f, _falPct, playerPos.z)));
-            float angleToMinRay = Vector3.Angle(rayToMinHeight.direction, rayToPlayerY.direction);
-            
+    		rayToHeight = camera.ViewportPointToRay((new Vector3(0.5f, _falPct, playerPos.z)));
+            float angleToMinRay = Vector3.Angle(rayToHeight.direction, rayToPlayerY.direction);
+            Debug.DrawRay(rayToPlayerY.origin, rayToPlayerY.direction);
+			Debug.DrawRay(rayToHeight.origin, rayToHeight.direction);
             //check to see if the angle is near some threshold, which can be
             //made into a variable at some point in the future.
-            if(angleToMinRay <= 1.0f)
+            if(angleToMinRay >= 10.0f && rayToHeight.GetPoint(1.0f).y > rayToPlayerY.GetPoint(1.0f).y)
                 ret = playerPos.y;
 			break;
 		default:
                 ret = _newPos.y;
 			break;
 		}
-		print (ret);
 		return ret;
 	}
 }

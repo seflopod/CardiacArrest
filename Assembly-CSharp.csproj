@@ -5,7 +5,7 @@
 	<Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
 	<ProductVersion>10.0.20506</ProductVersion>
 	<SchemaVersion>2.0</SchemaVersion>
-	<ProjectGuid>{0500943E-C906-38E6-4F44-C92BDD287A36}</ProjectGuid>
+	<ProjectGuid>{B8660F56-849A-2F7E-49BB-CDF8056F0998}</ProjectGuid>
 	<OutputType>Library</OutputType>
 	<AppDesignerFolder>Properties</AppDesignerFolder>
 	<RootNamespace></RootNamespace>
@@ -55,6 +55,8 @@
      <Compile Include="Assets\Scripts\Environment\PlatformTiles.cs" />
      <Compile Include="Assets\Scripts\Environment\VectorPaths.cs" />
      <Compile Include="Assets\Scripts\Management\CameraManager.cs" />
+     <Compile Include="Assets\Scripts\Management\CreateBloodCellLayerData.cs" />
+     <Compile Include="Assets\Scripts\Management\GameConditions.cs" />
      <Compile Include="Assets\Scripts\Management\GameManager.cs" />
      <Compile Include="Assets\Scripts\Management\InputController.cs" />
      <Compile Include="Assets\Scripts\Management\MovementManager.cs" />
@@ -73,7 +75,9 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Assembly-CSharp-firstpass.csproj">
-      <Project>{CF9B5C56-7331-6CFB-CCB0-8338CED53CB1}</Project>      <Name>Assembly-CSharp-firstpass</Name>    </ProjectReference>
+      <Project>{DC195853-FF97-B268-9D87-160CA6506E64}</Project>      <Name>Assembly-CSharp-firstpass</Name>    </ProjectReference>
+    <ProjectReference Include="Assembly-UnityScript-firstpass.unityproj">
+      <Project>{23D6E02A-165F-F08D-4314-0ADCDCAFD12C}</Project>      <Name>Assembly-UnityScript-firstpass</Name>    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
